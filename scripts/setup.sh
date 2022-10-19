@@ -11,3 +11,10 @@ comdex add-genesis-account test 100000000000000stake --keyring-backend test
 comdex gentx test 1000000000stake --chain-id test --keyring-backend test
 comdex collect-gentxs
 comdex start
+
+comdex init --chain-id test test
+comdex keys add test  --keyring-backend test
+comdex add-genesis-account test 100000000000000stake --keyring-backend test
+comdex gentx test 1000000000stake --chain-id test --keyring-backend test
+comdex collect-gentxs
+comdex start
