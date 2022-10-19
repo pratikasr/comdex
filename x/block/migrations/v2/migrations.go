@@ -1,7 +1,6 @@
 package v2
 
 import (
-	"fmt"
 	v2types "github.com/comdex-official/comdex/x/block/migrations/v2/types"
 	blocktypes "github.com/comdex-official/comdex/x/block/types"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -11,11 +10,8 @@ import (
 )
 
 func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
-	fmt.Println("going in MigrateStore")
 	store := ctx.KVStore(storeKey)
-	fmt.Println("store", store)
 	err := migrateValuesAsset(store, cdc)
-	fmt.Println("err", err)
 	if err != nil {
 		return err
 	}
@@ -24,14 +20,10 @@ func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.Binar
 }
 func migrateValuesAsset(store sdk.KVStore, cdc codec.BinaryCodec) error {
 
-	fmt.Println("going in migrateValuesAsset")
 	key := blocktypes.AssetIDKey
 	oldVal := store.Get(key)
-	fmt.Println("key", key)
-	fmt.Println("oldVal", oldVal)
 	var id protobuftypes.UInt64Value
 	cdc.MustUnmarshal(oldVal, &id)
-	fmt.Println("oldVal", oldVal)
 	for i := uint64(1); i <= id.GetValue(); i++ {
 		newVal := migrateValueAsset(cdc, oldVal)
 		store.Delete(key)
@@ -45,16 +37,8 @@ func migrateValueAsset(cdc codec.BinaryCodec, oldVal []byte) (newVal []byte) {
 
 	// convert oldVal into lend type of previous version
 	// use oldVal to create new lend of updated struct
-	fmt.Println("going in migrateValueAsset")
 	var asset v2types.Asset
 	cdc.MustUnmarshal(oldVal, &asset)
-	fmt.Println("asset.Id", asset.Id)
-	fmt.Println("asset.Name", asset.Name)
-	fmt.Println("asset.Denom", asset.Denom)
-	fmt.Println("asset.Decimal", asset.Decimal)
-	fmt.Println("asset.Price", asset.Price)
-	fmt.Println("asset.AppID", asset.AppId)
-	fmt.Println("asset.IbcStatus", asset.IbcStatus)
 
 	newAsset := blocktypes.Asset{
 		Id:        asset.Id,
@@ -63,7 +47,6 @@ func migrateValueAsset(cdc codec.BinaryCodec, oldVal []byte) (newVal []byte) {
 		Decimal:   asset.Decimal,
 		IbcStatus: asset.IbcStatus,
 	}
-	fmt.Println("newAsset", newAsset)
 
 	newVal = cdc.MustMarshal(&newAsset)
 	return newVal
