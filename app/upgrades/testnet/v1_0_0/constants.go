@@ -2,7 +2,7 @@ package v1_0_0 //nolint:revive,stylecheck
 
 const (
 	UpgradeName   = "v1.0.0"
-	UpgradeHeight = 3376737
+	UpgradeHeight = ""
 	UpgradeInfo   = `'{
 		"binaries": {
 			"darwin/arm64":"",

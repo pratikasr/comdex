@@ -9,7 +9,6 @@ import (
 	"sort"
 	"strings"
 
-	icacontrollertypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/controller/types"
 	"github.com/gorilla/mux"
 	"github.com/rakyll/statik/fs"
 
@@ -169,11 +168,7 @@ import (
 
 	cwasm "github.com/comdex-official/comdex/app/wasm"
 
-	mv5 "github.com/comdex-official/comdex/app/upgrades/mainnet/v5"
 	tv1_0_0 "github.com/comdex-official/comdex/app/upgrades/testnet/v1_0_0"
-	tv2_0_0 "github.com/comdex-official/comdex/app/upgrades/testnet/v2_0_0"
-	tv3_0_0 "github.com/comdex-official/comdex/app/upgrades/testnet/v3_0_0"
-	tv4_0_0 "github.com/comdex-official/comdex/app/upgrades/testnet/v4_0_0"
 )
 
 const (
@@ -1160,8 +1155,8 @@ func (a *App) ModuleAccountsPermissions() map[string][]string {
 
 func (a *App) registerUpgradeHandlers() {
 	a.UpgradeKeeper.SetUpgradeHandler(
-		tv4_0_0.UpgradeNameV4_4_0,
-		tv4_0_0.CreateUpgradeHandlerV440(a.mm, a.configurator, a.LendKeeper, a.LiquidationKeeper, a.AuctionKeeper),
+		tv1_0_0.UpgradeName,
+		tv1_0_0.CreateUpgradeHandler(a.mm, a.configurator),
 	)
 
 	// When a planned update height is reached, the old binary will panic
@@ -1185,83 +1180,7 @@ func (a *App) registerUpgradeHandlers() {
 func upgradeHandlers(upgradeInfo storetypes.UpgradeInfo, a *App, storeUpgrades *storetypes.StoreUpgrades) *storetypes.StoreUpgrades {
 	switch {
 	case upgradeInfo.Name == tv1_0_0.UpgradeName && !a.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height):
-		// prepare store for testnet upgrade v1.0.0
-		storeUpgrades = &storetypes.StoreUpgrades{
-			Added:   []string{authz.ModuleName},
-			Deleted: []string{"asset", "liquidity", "oracle", "vault"},
-		}
-	case upgradeInfo.Name == tv2_0_0.UpgradeName && !a.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height):
-		// prepare store for testnet upgrade v2.0.0
-		storeUpgrades = &storetypes.StoreUpgrades{
-			Added: []string{
-				assettypes.ModuleName,
-				auctiontypes.ModuleName,
-				bandoraclemoduletypes.ModuleName,
-				collectortypes.ModuleName,
-				esmtypes.ModuleName,
-				lendtypes.ModuleName,
-				liquidationtypes.ModuleName,
-				liquiditytypes.ModuleName,
-				lockertypes.ModuleName,
-				markettypes.ModuleName,
-				rewardstypes.ModuleName,
-				tokenminttypes.ModuleName,
-				vaulttypes.ModuleName,
-				feegrant.ModuleName,
-				icacontrollertypes.StoreKey,
-				icahosttypes.StoreKey,
-			},
-		}
-	case upgradeInfo.Name == tv2_0_0.UpgradeNameV2 && !a.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height):
-		// prepare store for testnet upgrade v2.1.0
-		storeUpgrades = &storetypes.StoreUpgrades{
-			Added: []string{
-				icacontrollertypes.StoreKey,
-				icahosttypes.StoreKey,
-			},
-		}
-	case upgradeInfo.Name == tv3_0_0.UpgradeName && !a.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height):
-	case upgradeInfo.Name == tv4_0_0.UpgradeName && !a.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height):
-		// delete deprecated kv store instead of migrating as this is only for testnet.
-		// won't be used on main net migration and to make store name similar with V1 appended for all modules
-		storeUpgrades = &storetypes.StoreUpgrades{
-			Deleted: []string{"vaultv1", "rewards", "collector", "locker", "lend", "auction", "liquidation", "esm"},
-			Added: []string{
-				vaulttypes.ModuleName, rewardstypes.ModuleName, liquidationtypes.ModuleName,
-				collectortypes.ModuleName, lockertypes.ModuleName, lendtypes.ModuleName, auctiontypes.ModuleName, esmtypes.ModuleName,
-			},
-		}
-	case upgradeInfo.Name == tv4_0_0.UpgradeNameV4_1_0 && !a.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height):
 		storeUpgrades = &storetypes.StoreUpgrades{}
-	case upgradeInfo.Name == tv4_0_0.UpgradeNameV4_2_0 && !a.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height):
-		storeUpgrades = &storetypes.StoreUpgrades{}
-	case upgradeInfo.Name == tv4_0_0.UpgradeNameV4_3_0 && !a.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height):
-		storeUpgrades = &storetypes.StoreUpgrades{}
-	case upgradeInfo.Name == tv4_0_0.UpgradeNameV4_4_0 && !a.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height):
-		storeUpgrades = &storetypes.StoreUpgrades{}
-
-	// prepare store for main net upgrade v5.0.0
-	case upgradeInfo.Name == mv5.UpgradeName && !a.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height):
-		storeUpgrades = &storetypes.StoreUpgrades{
-			Added: []string{
-				assettypes.ModuleName,
-				auctiontypes.ModuleName,
-				bandoraclemoduletypes.ModuleName,
-				collectortypes.ModuleName,
-				esmtypes.ModuleName,
-				liquidationtypes.ModuleName,
-				liquiditytypes.ModuleName,
-				lockertypes.ModuleName,
-				markettypes.ModuleName,
-				rewardstypes.ModuleName,
-				tokenminttypes.ModuleName,
-				vaulttypes.ModuleName,
-				feegrant.ModuleName,
-				icacontrollertypes.StoreKey,
-				icahosttypes.StoreKey,
-				authz.ModuleName,
-			},
-		}
 	}
 
 	return storeUpgrades
