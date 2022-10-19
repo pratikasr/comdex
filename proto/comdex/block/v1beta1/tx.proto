@@ -16,9 +16,9 @@ message MsgAddAsset {
   string name = 2;
   string denom = 3;
   string decimal = 4;
-  string price = 5;
-  string appId = 6;
-  string ibcStatus = 7;
+//  string price = 5;
+//  string appId = 6;
+  string ibcStatus = 5;
 }
 
 message MsgAddAssetResponse {

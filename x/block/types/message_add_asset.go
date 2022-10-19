@@ -9,14 +9,14 @@ const TypeMsgAddAsset = "add_asset"
 
 var _ sdk.Msg = &MsgAddAsset{}
 
-func NewMsgAddAsset(creator string, name string, denom string, decimal string, price string, appId string, ibcStatus string) *MsgAddAsset {
+func NewMsgAddAsset(creator string, name string, denom string, decimal string, ibcStatus string) *MsgAddAsset {
 	return &MsgAddAsset{
-		Creator:   creator,
-		Name:      name,
-		Denom:     denom,
-		Decimal:   decimal,
-		Price:     price,
-		AppId:     appId,
+		Creator: creator,
+		Name:    name,
+		Denom:   denom,
+		Decimal: decimal,
+		//Price:     price,
+		//AppId:     appId,
 		IbcStatus: ibcStatus,
 	}
 }

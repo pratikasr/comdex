@@ -48,12 +48,12 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 func (k Keeper) AddAsset(ctx sdk.Context, msg types.MsgAddAsset) error {
 	id := k.GetAssetID(ctx)
 	asset := types.Asset{
-		Id:        id + 1,
-		Name:      msg.Name,
-		Denom:     msg.Denom,
-		Decimal:   msg.Decimal,
-		Price:     msg.Price,
-		AppId:     msg.AppId,
+		Id:      id + 1,
+		Name:    msg.Name,
+		Denom:   msg.Denom,
+		Decimal: msg.Decimal,
+		//Price:     msg.Price,
+		//AppId:     msg.AppId,
 		IbcStatus: msg.IbcStatus,
 	}
 	k.SetAssetID(ctx, asset.Id)
