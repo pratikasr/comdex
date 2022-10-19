@@ -13,7 +13,9 @@ import (
 func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
 	fmt.Println("going in MigrateStore")
 	store := ctx.KVStore(storeKey)
+	fmt.Println("store", store)
 	err := migrateValuesAsset(store, cdc)
+	fmt.Println("err", err)
 	if err != nil {
 		return err
 	}
@@ -25,8 +27,11 @@ func migrateValuesAsset(store sdk.KVStore, cdc codec.BinaryCodec) error {
 	fmt.Println("going in migrateValuesAsset")
 	key := blocktypes.AssetIDKey
 	oldVal := store.Get(key)
+	fmt.Println("key", key)
+	fmt.Println("oldVal", oldVal)
 	var id protobuftypes.UInt64Value
 	cdc.MustUnmarshal(oldVal, &id)
+	fmt.Println("oldVal", oldVal)
 	for i := uint64(1); i <= id.GetValue(); i++ {
 		newVal := migrateValueAsset(cdc, oldVal)
 		store.Delete(key)
@@ -40,7 +45,7 @@ func migrateValueAsset(cdc codec.BinaryCodec, oldVal []byte) (newVal []byte) {
 
 	// convert oldVal into lend type of previous version
 	// use oldVal to create new lend of updated struct
-
+	fmt.Println("going in migrateValueAsset")
 	var asset v2types.Asset
 	cdc.MustUnmarshal(oldVal, &asset)
 	fmt.Println("asset.Id", asset.Id)
