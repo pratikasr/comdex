@@ -126,6 +126,11 @@ import (
 	lendclient "github.com/comdex-official/comdex/x/lend/client"
 	lendkeeper "github.com/comdex-official/comdex/x/lend/keeper"
 	lendtypes "github.com/comdex-official/comdex/x/lend/types"
+
+	"github.com/comdex-official/comdex/x/block"
+	blockkeeper "github.com/comdex-official/comdex/x/block/keeper"
+	blocktypes "github.com/comdex-official/comdex/x/block/types"
+
 	"github.com/comdex-official/comdex/x/locker"
 	lockerkeeper "github.com/comdex-official/comdex/x/locker/keeper"
 	lockertypes "github.com/comdex-official/comdex/x/locker/types"
@@ -252,6 +257,7 @@ var (
 		asset.AppModuleBasic{},
 		esm.AppModuleBasic{},
 		lend.AppModuleBasic{},
+		block.AppModuleBasic{},
 
 		market.AppModuleBasic{},
 		locker.AppModuleBasic{},
@@ -332,6 +338,7 @@ type App struct {
 	LockerKeeper      lockerkeeper.Keeper
 	EsmKeeper         esmkeeper.Keeper
 	LendKeeper        lendkeeper.Keeper
+	BlockKeeper       blockkeeper.Keeper
 	ScopedWasmKeeper  capabilitykeeper.ScopedKeeper
 	AuctionKeeper     auctionkeeper.Keeper
 	TokenmintKeeper   tokenmintkeeper.Keeper
@@ -372,7 +379,7 @@ func New(
 			vaulttypes.StoreKey, assettypes.StoreKey, collectortypes.StoreKey, liquidationtypes.StoreKey,
 			markettypes.StoreKey, bandoraclemoduletypes.StoreKey, lockertypes.StoreKey,
 			wasm.StoreKey, authzkeeper.StoreKey, auctiontypes.StoreKey, tokenminttypes.StoreKey,
-			rewardstypes.StoreKey, feegrant.StoreKey, liquiditytypes.StoreKey, esmtypes.ModuleName, lendtypes.StoreKey,
+			rewardstypes.StoreKey, feegrant.StoreKey, liquiditytypes.StoreKey, esmtypes.ModuleName, lendtypes.StoreKey, blocktypes.StoreKey,
 		)
 	)
 
@@ -417,6 +424,7 @@ func New(
 	app.ParamsKeeper.Subspace(collectortypes.ModuleName)
 	app.ParamsKeeper.Subspace(esmtypes.ModuleName)
 	app.ParamsKeeper.Subspace(lendtypes.ModuleName)
+	app.ParamsKeeper.Subspace(blocktypes.ModuleName)
 	app.ParamsKeeper.Subspace(markettypes.ModuleName)
 	app.ParamsKeeper.Subspace(liquidationtypes.ModuleName)
 	app.ParamsKeeper.Subspace(lockertypes.ModuleName)
@@ -567,6 +575,13 @@ func New(
 		&app.AssetKeeper,
 		&app.MarketKeeper,
 		&app.EsmKeeper,
+	)
+
+	app.BlockKeeper = *blockkeeper.NewKeeper(
+		app.cdc,
+		app.keys[blocktypes.StoreKey],
+		app.keys[blocktypes.StoreKey],
+		app.GetSubspace(blocktypes.ModuleName),
 	)
 
 	app.EsmKeeper = esmkeeper.NewKeeper(
@@ -843,6 +858,7 @@ func New(
 		collector.NewAppModule(app.cdc, app.CollectorKeeper, app.AccountKeeper, app.BankKeeper),
 		esm.NewAppModule(app.cdc, app.EsmKeeper, app.AccountKeeper, app.BankKeeper),
 		lend.NewAppModule(app.cdc, app.LendKeeper, app.AccountKeeper, app.BankKeeper),
+		block.NewAppModule(app.cdc, app.BlockKeeper, app.AccountKeeper, app.BankKeeper),
 		wasm.NewAppModule(app.cdc, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
 		auction.NewAppModule(app.cdc, app.AuctionKeeper, app.AccountKeeper, app.BankKeeper),
 		tokenmint.NewAppModule(app.cdc, app.TokenmintKeeper, app.AccountKeeper, app.BankKeeper),
@@ -862,7 +878,7 @@ func New(
 		authz.ModuleName, transferModule.Name(), assettypes.ModuleName, collectortypes.ModuleName, vaulttypes.ModuleName,
 		liquidationtypes.ModuleName, auctiontypes.ModuleName, tokenminttypes.ModuleName,
 		vesting.AppModuleBasic{}.Name(), paramstypes.ModuleName, wasmtypes.ModuleName, banktypes.ModuleName,
-		govtypes.ModuleName, rewardstypes.ModuleName, liquiditytypes.ModuleName, lendtypes.ModuleName, esmtypes.ModuleName,
+		govtypes.ModuleName, rewardstypes.ModuleName, liquiditytypes.ModuleName, lendtypes.ModuleName, esmtypes.ModuleName, blocktypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -872,7 +888,7 @@ func New(
 		icatypes.ModuleName, vaulttypes.ModuleName, liquidationtypes.ModuleName, auctiontypes.ModuleName, tokenminttypes.ModuleName,
 		wasmtypes.ModuleName, authtypes.ModuleName, slashingtypes.ModuleName, authz.ModuleName,
 		paramstypes.ModuleName, capabilitytypes.ModuleName, upgradetypes.ModuleName, transferModule.Name(), lendtypes.ModuleName,
-		assettypes.ModuleName, collectortypes.ModuleName, banktypes.ModuleName, rewardstypes.ModuleName, liquiditytypes.ModuleName, esmtypes.ModuleName,
+		assettypes.ModuleName, collectortypes.ModuleName, banktypes.ModuleName, rewardstypes.ModuleName, liquiditytypes.ModuleName, esmtypes.ModuleName, blocktypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -899,6 +915,7 @@ func New(
 		collectortypes.ModuleName,
 		esmtypes.ModuleName,
 		lendtypes.ModuleName,
+		blocktypes.ModuleName,
 		vaulttypes.ModuleName,
 		tokenminttypes.ModuleName,
 		bandoraclemoduletypes.ModuleName,

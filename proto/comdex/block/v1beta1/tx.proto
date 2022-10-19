@@ -1,0 +1,27 @@
+syntax = "proto3";
+package comdex.block.v1beta1;
+
+// this line is used by starport scaffolding # proto/tx/import
+
+option go_package = "github.com/comdex-official/comdex/x/block/types";
+
+// Msg defines the Msg service.
+service Msg {
+      rpc AddAsset(MsgAddAsset) returns (MsgAddAssetResponse);
+// this line is used by starport scaffolding # proto/tx/rpc
+}
+
+message MsgAddAsset {
+  string creator = 1;
+  string name = 2;
+  string denom = 3;
+  string decimal = 4;
+  string price = 5;
+  string appId = 6;
+  string ibcStatus = 7;
+}
+
+message MsgAddAssetResponse {
+}
+
+// this line is used by starport scaffolding # proto/tx/message
