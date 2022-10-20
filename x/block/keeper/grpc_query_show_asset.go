@@ -17,7 +17,7 @@ func (q Keeper) ShowAsset(c context.Context, req *types.QueryShowAssetRequest) (
 
 	ctx := sdk.UnwrapSDKContext(c)
 
-	item, found := q.GetAsset(ctx, req.Id)
+	item, found := q.NewGetAsset(ctx, req.Id)
 	if !found {
 		return nil, status.Errorf(codes.NotFound, "asset does not exist for id %d", req.Id)
 	}

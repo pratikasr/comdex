@@ -20,10 +20,16 @@ const (
 )
 
 var (
-	AssetIDKey     = []byte{0x01}
-	AssetKeyPrefix = []byte{0x02}
+	AssetIDKey        = []byte{0x01}
+	AssetKeyPrefix    = []byte{0x02}
+	NewAssetIDKey     = []byte{0x03}
+	NewAssetKeyPrefix = []byte{0x04}
 )
 
 func AssetKey(id uint64) []byte {
 	return append(AssetKeyPrefix, sdk.Uint64ToBigEndian(id)...)
+}
+
+func NewAssetKey(id uint64) []byte {
+	return append(NewAssetKeyPrefix, sdk.Uint64ToBigEndian(id)...)
 }
