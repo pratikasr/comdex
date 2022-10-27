@@ -153,24 +153,3 @@ func (k Keeper) NewGetAsset(ctx sdk.Context, id uint64) (asset types.Asset, foun
 	k.cdc.MustUnmarshal(value, &asset)
 	return asset, true
 }
-
-func (k Keeper) MigrateValuesAsset(ctx sdk.Context) error {
-	assetID := k.GetAssetID(ctx)
-	fmt.Println("assetID", assetID)
-	for i := 1; i <= int(assetID); i++ {
-		asset, _ := k.GetAsset(ctx, uint64(i))
-		fmt.Println("oldAsset", asset)
-		msg := types.MsgAddAsset{
-			Name:      asset.Name,
-			Denom:     asset.Denom,
-			Decimal:   asset.Decimal,
-			IbcStatus: asset.IbcStatus,
-		}
-		err := k.AddAsset(ctx, msg)
-		fmt.Println("err", err)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
