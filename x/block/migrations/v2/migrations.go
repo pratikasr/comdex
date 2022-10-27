@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	protobuftypes "github.com/gogo/protobuf/types"
 )
 
 func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
@@ -34,10 +35,17 @@ func migrateValues(store sdk.KVStore, cdc codec.BinaryCodec) error {
 		cdc.MustUnmarshal(iter.Value(), &asset)
 		assets = append(assets, asset)
 	}
+	counterKey := types.NewAssetIDKey
 	for _, v := range assets {
 		newVal, Key := migrateValue(v)
 		store.Delete(Key)
 		value := cdc.MustMarshal(&newVal)
+		idValue := cdc.MustMarshal(
+			&protobuftypes.UInt64Value{
+				Value: v.Id,
+			},
+		)
+		store.Set(counterKey, idValue)
 		store.Set(Key, value)
 	}
 	return nil
