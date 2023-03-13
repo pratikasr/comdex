@@ -1,0 +1,46 @@
+syntax = "proto3";
+package comdex.loan.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+
+option go_package = "github.com/comdex-official/comdex/x/loan/types";
+
+message Loan {
+  uint64 id = 1 ;
+  uint64 app_id = 2
+  [(gogoproto.customname) = "AppId",
+    (gogoproto.moretags) = "yaml:\"app_id\""];
+
+  uint64 pair_id = 3 [
+    (gogoproto.customname) = "PairID",
+    (gogoproto.moretags) = "yaml:\"pair_id\""];
+
+  string owner = 4 [(gogoproto.moretags) = "yaml:\"owner\""];
+  string amount_in = 5 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.moretags) = "yaml:\"amount_in\"",
+    (gogoproto.nullable) = false
+  ];
+  string amount_out = 6 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.moretags) = "yaml:\"amount_out\"",
+    (gogoproto.nullable) = false
+  ];
+  string fee = 7 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.moretags) = "yaml:\"fee\"",
+    (gogoproto.nullable) = false
+  ];
+  google.protobuf.Timestamp created_at = 8 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime) = true,
+    (gogoproto.moretags) = "yaml:\"created_at\""
+  ];
+  int64 duration_days = 9 [
+    (gogoproto.moretags) = "yaml:\"duration_days\""
+  ];
+  string lender = 10 [(gogoproto.moretags) = "yaml:\"owner\""];
+  string state = 11 [(gogoproto.moretags) = "yaml:\"state\""];
+}

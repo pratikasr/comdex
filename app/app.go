@@ -164,6 +164,10 @@ import (
 	liquiditykeeper "github.com/comdex-official/comdex/x/liquidity/keeper"
 	liquiditytypes "github.com/comdex-official/comdex/x/liquidity/types"
 
+	"github.com/comdex-official/comdex/x/loan"
+	loankeeper "github.com/comdex-official/comdex/x/loan/keeper"
+	loantypes "github.com/comdex-official/comdex/x/loan/types"
+
 	cwasm "github.com/comdex-official/comdex/app/wasm"
 
 	mv10 "github.com/comdex-official/comdex/app/upgrades/mainnet/v10"
@@ -270,6 +274,7 @@ var (
 		liquidity.AppModuleBasic{},
 		rewards.AppModuleBasic{},
 		ica.AppModuleBasic{},
+		loan.AppModuleBasic{},
 	)
 )
 
@@ -343,6 +348,7 @@ type App struct {
 	TokenmintKeeper   tokenmintkeeper.Keeper
 	LiquidityKeeper   liquiditykeeper.Keeper
 	Rewardskeeper     rewardskeeper.Keeper
+	LoanKeeper        loankeeper.Keeper
 
 	WasmKeeper wasm.Keeper
 	// the module manager
@@ -378,7 +384,7 @@ func New(
 			vaulttypes.StoreKey, assettypes.StoreKey, collectortypes.StoreKey, liquidationtypes.StoreKey,
 			markettypes.StoreKey, bandoraclemoduletypes.StoreKey, lockertypes.StoreKey,
 			wasm.StoreKey, authzkeeper.StoreKey, auctiontypes.StoreKey, tokenminttypes.StoreKey,
-			rewardstypes.StoreKey, feegrant.StoreKey, liquiditytypes.StoreKey, esmtypes.ModuleName, lendtypes.StoreKey,
+			rewardstypes.StoreKey, feegrant.StoreKey, liquiditytypes.StoreKey, esmtypes.ModuleName, lendtypes.StoreKey, loantypes.StoreKey,
 		)
 	)
 
@@ -432,6 +438,7 @@ func New(
 	app.ParamsKeeper.Subspace(tokenminttypes.ModuleName)
 	app.ParamsKeeper.Subspace(liquiditytypes.ModuleName)
 	app.ParamsKeeper.Subspace(rewardstypes.ModuleName)
+	app.ParamsKeeper.Subspace(loantypes.ModuleName)
 
 	// set the BaseApp's parameter store
 	baseApp.SetParamStore(
@@ -736,6 +743,14 @@ func New(
 		&app.LendKeeper,
 	)
 
+	app.LoanKeeper = loankeeper.NewKeeper(
+		app.cdc,
+		app.keys[loantypes.StoreKey],
+		app.keys[loantypes.StoreKey],
+		app.GetSubspace(loantypes.ModuleName),
+		app.BankKeeper,
+		&app.AssetKeeper,
+	)
 	wasmDir := filepath.Join(homePath, "wasm")
 	wasmConfig, err := wasm.ReadWasmConfig(appOptions)
 	if err != nil {
@@ -857,6 +872,7 @@ func New(
 		tokenmint.NewAppModule(app.cdc, app.TokenmintKeeper, app.AccountKeeper, app.BankKeeper),
 		liquidity.NewAppModule(app.cdc, app.LiquidityKeeper, app.AccountKeeper, app.BankKeeper, app.AssetKeeper),
 		rewards.NewAppModule(app.cdc, app.Rewardskeeper, app.AccountKeeper, app.BankKeeper),
+		loan.NewAppModule(app.cdc, app.LoanKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -897,6 +913,7 @@ func New(
 		liquiditytypes.ModuleName,
 		lendtypes.ModuleName,
 		esmtypes.ModuleName,
+		lockertypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -933,6 +950,7 @@ func New(
 		rewardstypes.ModuleName,
 		liquiditytypes.ModuleName,
 		esmtypes.ModuleName,
+		lockertypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -973,6 +991,7 @@ func New(
 		liquiditytypes.ModuleName,
 		rewardstypes.ModuleName,
 		crisistypes.ModuleName,
+		lockertypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -1213,6 +1232,7 @@ func (a *App) ModuleAccountsPermissions() map[string][]string {
 		liquiditytypes.ModuleName:      {authtypes.Minter, authtypes.Burner},
 		rewardstypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
 		icatypes.ModuleName:            nil,
+		loantypes.ModuleName:           nil,
 	}
 }
 
